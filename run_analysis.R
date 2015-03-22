@@ -13,6 +13,10 @@
 
 ## Step 1: Merge the training and the test sets to create one data set.
 ## Put the different data sets in R variables
+## You will see 3 files per test and training set:
+##       - Subject file: the subjects linked to every value of the different measurements
+##       - X file: all values of the different measurements per subject and activity
+##       - Y file: the activities linked to every value of the different measurements
 ## - Test data
 Data_X_test <- read.table("./UCI HAR Dataset/test/X_test.txt")
 Data_Y_test <- read.table("./UCI HAR Dataset/test/Y_test.txt")
@@ -23,9 +27,9 @@ Data_X_training <- read.table("./UCI HAR Dataset/train/X_train.txt")
 Data_Y_training <- read.table("./UCI HAR Dataset/train/Y_train.txt")
 Subject_training <- read.table("./UCI HAR Dataset/train/subject_train.txt")
 
-## Concatenate the X data sets together
+## Concatenate the X data sets (measurements) together
 AllData_X <- rbind(Data_X_training, Data_X_test)
-## Concatenate the Y data sets together
+## Concatenate the Y data sets (activities) together
 AllData_Y <- rbind(Data_Y_training, Data_Y_test)
 ## Concatenate the Subject data sets together
 AllSubject <- rbind(Subject_training, Subject_test)
@@ -44,6 +48,7 @@ install.packages("dplyr")
 ## Call the dplyr package
 library("dplyr")
 ## Use the select function to get only the relevant measurements
+## The grep function will search for the patterns "mean" and "std" in the variable names.
 AllMeasurements <- AllData_X[,grep("mean|std",colnames(AllData_X))]
 
 ## Step 3: Use descriptive activity names to name the activities in the data set.
@@ -79,9 +84,12 @@ Names_Data3 <- gsub("\\()","",Names_Data3)
 ## Replace the column names from AllData3 with the new names
 colnames(AllData3) <- Names_Data3
 
+## After step 4 you will have the tidy data set AllData3 which has 81 variables (Subject, Activity
+## Measurement variables and 10299 observations)
+
 ## Step 5: From the data set in step 4, create a second, independent tidy data set with the 
 ## average of each variable for each activity and each subject.
-## We will use the summarise_each function from the dplyr package to do this.
+## We will use the group_by and summarise_each functions from the dplyr package to do this.
 AllData4 <- AllData3 %>%
   group_by(subject, activity) %>%
   summarise_each(funs(mean(.,na.rm=TRUE)))
@@ -89,3 +97,4 @@ AllData4 <- AllData3 %>%
 ## Create a txt file that contains the data from AllData4 and store this in your working directory
 write.table(AllData4, "Averages_Activity_Subject.txt", row.names=FALSE)
 
+## Now, we have two tidy data sets AllData3 and AllData4. 
